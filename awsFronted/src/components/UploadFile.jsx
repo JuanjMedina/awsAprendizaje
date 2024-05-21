@@ -1,8 +1,11 @@
 import { useState } from "react"
 import { uploadImage } from "../services/image"
 import { Spinner } from "./Spinner"
+import { useAlert } from "react-alert"
+import { Button, Chip, chip } from "@nextui-org/react"
 
 export default function UploadFile() {
+  const alert = useAlert()
   const [file, setFile] = useState("")
   const [loading, setLoading] = useState(false)
   const [responseData, setResponseData] = useState("")
@@ -15,23 +18,28 @@ export default function UploadFile() {
     e.preventDefault()
     setLoading(true)
     if (!file) {
-      return alert("No hay archivos seleccionados")
+      alert.error("Por favor, selecciona un archivo para cargar.")
+      setLoading(false)
+      return
     }
 
     const formData = new FormData()
     formData.append("file", file)
 
-    const responseUploadmovie = await uploadImage({ formData })
-    if (responseUploadmovie) {
-      alert("Imagen subida correctamente")
+    try {
+      const responseUploadmovie = await uploadImage({ formData })
+      if (responseUploadmovie) {
+        alert.success("Imagen subida correctamente")
+        setFile(null)
+        setResponseData(responseUploadmovie.data)
+      }
+    } catch (error) {
+      alert.error("Error al subir la imagen. Inténtalo de nuevo.")
+    } finally {
       setLoading(false)
-      setFile(null)
-      console.log(responseUploadmovie)
-      setResponseData(responseUploadmovie.data)
-      console.log(`responseData : ${responseUploadmovie.data}`)
     }
-    console.log(responseUploadmovie)
   }
+
   return (
     <section>
       <h2 className='text-2xl font-bold mb-4'>Cargar Imágenes</h2>
@@ -45,7 +53,7 @@ export default function UploadFile() {
         <form
           onSubmit={handleSubmit}
           id='uploadFile'
-          className='flex flex-col gap-4 '
+          className='flex flex-col gap-4'
         >
           <input
             className='block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400'
@@ -55,24 +63,30 @@ export default function UploadFile() {
             onChange={handleFileChange}
           />
           {loading && <Spinner />}
-          <button
-            type='submit'
-            id='file_input_button'
-            className='text-white bg-gradient-to-r from-green-400 via-green-500 to-green-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-green-300 dark:focus:ring-green-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 '
-          >
-            Enviar archivos
-          </button>
+          <Button type='submit' color='success'>
+            Cargar imagen
+          </Button>
         </form>
       </div>
 
       {responseData && (
-        <div className='bg-gray-100 dark:bg-gray-800 rounded-lg p-6 mt-4'>
-          <h3 className='text-lg font-bold mb-4'>imagen Cargada</h3>
+        <div className='bg-gray-800 rounded-lg p-6 mt-4'>
+          <h3 className='text-lg font-bold mb-4'>Imagen Cargada</h3>
           <img
             src={responseData.url}
             alt='Imagen Aws'
             className='h-auto max-w-full rounded-lg'
           />
+          <div className='mt-5'>
+            <h4 className='pb-3'> Labels asociados</h4>
+            <div className='flex flex-row flex-wrap gap-2'>
+              {responseData.labels.map((label, index) => (
+                <Chip key={index} size='sm' color='primary'>
+                  {label}
+                </Chip>
+              ))}
+            </div>
+          </div>
         </div>
       )}
     </section>

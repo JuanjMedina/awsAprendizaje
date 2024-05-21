@@ -1,9 +1,12 @@
-import { Select, SelectItem } from "@nextui-org/react"
+/* eslint-disable react/prop-types */
+import { Button, Select, SelectItem } from "@nextui-org/react"
 import { useEffect, useState } from "react"
-import { getAllCategories } from "../services/image"
+import { getAllCategories, getAllImagesByCategory } from "../services/image"
 
-function SearchOptions() {
+function SearchOptions({ setImagesData, setIsLoading }) {
   const [categories, setCategories] = useState([])
+  const [selectedCategories, setSelectedCategories] = useState(new Set([]))
+
   useEffect(() => {
     const responseCategories = async () => {
       const responseImages = await getAllCategories()
@@ -12,20 +15,44 @@ function SearchOptions() {
     responseCategories()
   }, [])
 
+  const handleSubmit = async e => {
+    e.preventDefault()
+    if (selectedCategories.size === 0)
+      return alert("Selecciona al menos una categoria")
+    const ArraySelectedCategories = Array.from(selectedCategories)
+    setIsLoading(true)
+    const responseImages = await getAllImagesByCategory({
+      categories: ArraySelectedCategories,
+    })
+    setIsLoading(false)
+    setImagesData(responseImages)
+    console.log(responseImages.map(value => value.url.S))
+  }
+  const handleSelectionChange = e => {
+    setSelectedCategories(new Set(e.target.value.split(",")))
+  }
   return (
-    <Select
-      label='Categorias de imagenes'
-      placeholder='Categorias'
-      selectionMode='multiple'
-      className='min-w-max w-48'
-      size='sm'
-    >
-      {categories.map(category => (
-        <SelectItem key={crypto.randomUUID()} value={category}>
-          {category}
-        </SelectItem>
-      ))}
-    </Select>
+    <form action='' className='flex items-center gap-3' onSubmit={handleSubmit}>
+      <Select
+        isRequired
+        label='Categorias de imagenes'
+        placeholder='Categorias'
+        selectionMode='multiple'
+        className='w-72 max-w-full'
+        size='sm'
+        onChange={handleSelectionChange}
+      >
+        {categories.map(category => (
+          <SelectItem key={category} value={category}>
+            {category}
+          </SelectItem>
+        ))}
+      </Select>
+      <Button type='submit' color='primary' variant='solid'>
+        Buscar
+      </Button>
+      <p></p>
+    </form>
   )
 }
 
