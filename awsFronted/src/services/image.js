@@ -1,12 +1,11 @@
+const API_URL = `http://18.234.210.148:3000`
+// const API_URL_LOCAL = `http://localhost:3000`
 export const uploadImage = async ({ formData }) => {
   try {
-    const response = await fetch(
-      'http://localhost:3000/api/recognition/upload',
-      {
-        method: 'POST',
-        body: formData,
-      },
-    )
+    const response = await fetch(`${API_URL}/api/recognition/upload`, {
+      method: 'POST',
+      body: formData,
+    })
     const json = await response.json()
     return json
   } catch (error) {
@@ -16,9 +15,7 @@ export const uploadImage = async ({ formData }) => {
 
 export const getAllCategories = async () => {
   try {
-    const response = await fetch(
-      'http://localhost:3000/api/recognition/categorys',
-    )
+    const response = await fetch(`${API_URL}/api/recognition/categorys`)
     const json = await response.json()
     return json
   } catch (err) {
@@ -33,7 +30,7 @@ export const getAllImagesByCategory = async ({ categories }) => {
     )}`
 
     // Construir la URL completa con los query params
-    const url = `http://localhost:3000/api/recognition/query?${queryParams}`
+    const url = `${API_URL}/api/recognition/query?${queryParams}`
 
     const response = await fetch(url)
     const json = await response.json()
