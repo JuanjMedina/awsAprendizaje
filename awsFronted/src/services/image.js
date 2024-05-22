@@ -1,4 +1,5 @@
-const API_URL = `http://18.234.210.148:3000`
+// const API_URL = `http://18.234.210.148:3000`
+const API_URL = `http://loadbalancerrekognition-1029510903.us-east-1.elb.amazonaws.com`
 // const API_URL_LOCAL = `http://localhost:3000`
 export const uploadImage = async ({ formData }) => {
   try {
